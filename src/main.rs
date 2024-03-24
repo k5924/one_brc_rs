@@ -41,12 +41,12 @@ fn main() -> std::io::Result<()> {
 
     while reader.read_line(&mut string).unwrap() > 0 {
         let unpacked_line = &string.trim();
-        let split = unpacked_line.split(";").to_owned();
+        let split = unpacked_line.split(";");
         let collection: Vec<&str> = split.collect::<Vec<&str>>();
-        let key = collection[0].to_owned();
-        let val = collection[1].to_owned();
+        let key = collection[0];
+        let val = collection[1];
         let converted = val.parse::<f64>().expect("unable to convert string to float");
-        entries.entry(key).or_default().update(converted);
+        entries.entry(key.to_string()).or_default().update(converted);
         string.clear();
     }
 
