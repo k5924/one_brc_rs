@@ -39,7 +39,7 @@ fn main() -> std::io::Result<()> {
 
     let now = Instant::now();
 
-    while reader.read_line(&mut string).unwrap() > 0 {
+    while reader.read_line(&mut string).expect("failed to get string") > 0 {
         let unpacked_line = &string.trim();
         let split = unpacked_line.split(";");
         let collection: Vec<&str> = split.collect::<Vec<&str>>();
