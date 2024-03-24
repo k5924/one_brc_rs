@@ -35,7 +35,7 @@ fn main() -> std::io::Result<()> {
     let file = File::open(filename).expect("error opening {filename}");
     let mut reader = BufReader::new(file);
     let mut string = String::new();
-    let mut entries: HashMap<String, Station> = HashMap::new();
+    let mut entries: HashMap<Box<str>, Station> = HashMap::new();
 
     let now = Instant::now();
 
@@ -46,7 +46,7 @@ fn main() -> std::io::Result<()> {
         let key = collection[0];
         let val = collection[1];
         let converted = val.parse::<f64>().expect("unable to convert string to float");
-        entries.entry(key.to_string()).or_default().update(converted);
+        entries.entry(key.into()).or_default().update(converted);
         string.clear();
     }
 
