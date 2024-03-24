@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, BufRead};
-use std::collections::BTreeMap;
+use std::collections::{HashMap};
 use std::time::Instant;
 
 struct Station {
@@ -14,7 +14,7 @@ fn main() -> std::io::Result<()> {
     let filename = "measurements.txt";
     let file = File::open(filename).expect("error opening {filename}");
     let reader = BufReader::new(file);
-    let mut entries: BTreeMap<String, Station> = BTreeMap::new();
+    let mut entries: HashMap<String, Station> = HashMap::new();
 
     let now = Instant::now();
 
@@ -46,7 +46,10 @@ fn main() -> std::io::Result<()> {
         }
     }
 
-    for (key, value) in entries.iter() {
+    let mut sorted: Vec<_> = entries.iter().collect();
+    sorted.sort_by_key(|a| a.0);
+
+    for (key, value) in sorted.iter() {
         println!("{0}={1}/{2}/{3}", key, value.minimum, value.maximum, value.sum / value.count);
     }
 
