@@ -32,17 +32,17 @@ impl Station {
 
 fn main() -> std::io::Result<()> {
     let filename = "measurements.txt";
-    let file = File::open(filename).expect("error opening {filename}");
+    let file = File::open(filename)?;
     let mut reader = BufReader::new(file);
     let mut string = String::new();
     let mut entries: HashMap<Box<str>, Station> = HashMap::new();
 
     let now = Instant::now();
 
-    while reader.read_line(&mut string).expect("failed to get string") > 0 {
+    while reader.read_line(&mut string)? > 0 {
         let unpacked_line = &string.trim();
-        let (key, val) = unpacked_line.split_once(';').expect("failed to split on line");
-        let converted = val.parse::<f64>().expect("unable to convert string to float");
+        let (key, val) = unpacked_line.split_once(';').expect("failed to split string");
+        let converted = val.parse::<f64>().expect("failed to parse float");
         entries.entry(key.into()).or_default().update(converted);
         string.clear();
     }
