@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, BufRead};
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::time::Instant;
 
 struct Station {
@@ -13,13 +13,14 @@ struct Station {
 fn main() -> std::io::Result<()> {
     let filename = "measurements.txt";
     let file = File::open(filename).expect("error opening {filename}");
-    let reader = BufReader::new(file);
+    let mut reader = BufReader::new(file);
+    let mut string = String::new();
     let mut entries: HashMap<String, Station> = HashMap::new();
 
     let now = Instant::now();
 
-    for line in reader.lines() {
-        let unpacked_line = line.expect("couldnt get line");
+    while reader.read_line(&mut string).unwrap() > 0 {
+        let unpacked_line = &string.trim();
         let split = unpacked_line.split(";").to_owned();
         let collection: Vec<&str> = split.collect::<Vec<&str>>();
         let key = collection[0].to_owned();
@@ -44,6 +45,7 @@ fn main() -> std::io::Result<()> {
             let new_station = Station{minimum, maximum, sum, count};
             entries.insert(key, new_station);
         }
+        string.clear();
     }
 
     let mut sorted: Vec<_> = entries.iter().collect();
