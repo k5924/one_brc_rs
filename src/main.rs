@@ -41,10 +41,7 @@ fn main() -> std::io::Result<()> {
 
     while reader.read_line(&mut string).expect("failed to get string") > 0 {
         let unpacked_line = &string.trim();
-        let split = unpacked_line.split(";");
-        let collection: Vec<&str> = split.collect::<Vec<&str>>();
-        let key = collection[0];
-        let val = collection[1];
+        let (key, val) = unpacked_line.split_once(";").expect("failed to split on line");
         let converted = val.parse::<f64>().expect("unable to convert string to float");
         entries.entry(key.into()).or_default().update(converted);
         string.clear();
