@@ -48,7 +48,7 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut sorted: Vec<_> = entries.iter().collect();
-    sorted.sort_by_key(|a| a.0);
+    sorted.sort_unstable_by_key(|a| a.0);
 
     for (key, value) in sorted.iter() {
         println!("{0}={1}/{2}/{3}", key, value.min, value.max, value.sum / value.count as f64);
