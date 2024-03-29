@@ -37,6 +37,31 @@ fn unmap_memory(mmap_ptr: *mut c_void, chunk_size: usize) -> io::Result<()> {
     Ok(())
 }
 
+fn split_and_print_line(line: &[u8]) {
+    let mut field_start = 0;
+    for (i, &byte) in line.iter().enumerate() {
+        if byte == b';' {
+            let field = &line[field_start..i];
+            if let Ok(part1) = std::str::from_utf8(field) {
+                if let Some(part2) = try_decode_utf8(&line[i + 1..]) {
+                    println!("{}:{}", part1, part2);
+                } else {
+                    // Handle invalid UTF-8 bytes or unexpected characters
+                    println!("{}:<invalid UTF-8>", part1);
+                }
+            }
+            field_start = i + 1;
+        }
+    }
+}
+
+fn try_decode_utf8(bytes: &[u8]) -> Option<&str> {
+    match std::str::from_utf8(bytes) {
+        Ok(s) => Some(s),
+        Err(_) => None,
+    }
+}
+
 pub fn read_file_in_chunks(file: &File) -> io::Result<()> {
     let metadata = file.metadata()?;
     let file_size = metadata.len() as usize;
@@ -55,7 +80,7 @@ pub fn read_file_in_chunks(file: &File) -> io::Result<()> {
         for (i, &byte) in data.iter().enumerate() {
             if byte == b'\n' {
                 let line = &data[start..i];
-                println!("{}", unsafe { String::from_utf8_unchecked(line.to_vec()) });
+                split_and_print_line(line);
                 start = i + 1;
             }
         }
@@ -67,9 +92,19 @@ pub fn read_file_in_chunks(file: &File) -> io::Result<()> {
         offset += chunk_size;
     }
 
+    let mut last_new_line_idx = 0;
+    for (i, &byte) in buffer.iter().enumerate() {
+        if byte == b'\n' {
+            let line = &buffer[last_new_line_idx..i];
+            split_and_print_line(line);
+            last_new_line_idx = i + 1;
+        }
+    }
+
+
     // Print the remaining content in the buffer if any
-    if !buffer.is_empty() {
-        println!("{}", unsafe { String::from_utf8_unchecked(buffer) });
+    if !last_new_line_idx < buffer.len() {
+        split_and_print_line(&buffer[last_new_line_idx..]);
     }
 
     Ok(())
