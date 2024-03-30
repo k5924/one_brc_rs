@@ -8,7 +8,7 @@ pub fn process_line(line: &[u8], map: &mut HashMap<String, Station>) {
 
         // Unsafe: Convert part1 to a String without checking for UTF-8 validity
 
-        if let Some(part2_float) = parse_float(&part2[1..]) {
+        if let Some(part2_float) = unsafe {parse_float(&part2[1..]) } {
             // Convert part1_str to the appropriate key type if necessary
             let key = unsafe { std::str::from_utf8_unchecked(part1).to_owned() };
 
