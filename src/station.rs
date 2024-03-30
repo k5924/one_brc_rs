@@ -1,9 +1,19 @@
-#[derive(Default)]
 pub struct Station {
     pub min: f64,
     pub max: f64,
     pub sum: f64,
     pub count: u64,
+}
+
+impl Default for Station {
+    fn default() -> Self {
+        Self {
+            min: f64::INFINITY,
+            max: f64::NEG_INFINITY,
+            sum: 0.0,
+            count: 0
+        }
+    }
 }
 
 impl Station {

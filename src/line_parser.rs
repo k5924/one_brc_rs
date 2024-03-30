@@ -7,11 +7,10 @@ pub fn process_line(line: &[u8], map: &mut HashMap<String, Station>) {
         let (part1, part2) = line.split_at(index);
 
         // Unsafe: Convert part1 to a String without checking for UTF-8 validity
-        let part1_str = unsafe { std::str::from_utf8_unchecked(part1).to_owned() };
 
         if let Some(part2_float) = parse_float(&part2[1..]) {
             // Convert part1_str to the appropriate key type if necessary
-            let key: String = part1_str;
+            let key = unsafe { std::str::from_utf8_unchecked(part1).to_owned() };
 
             // Get a mutable reference to the entry's value if it exists
             let entry = map.raw_entry_mut().from_key(&key);
