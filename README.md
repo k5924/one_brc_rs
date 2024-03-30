@@ -10,11 +10,18 @@ The profiling tool of choice i'm using throughout this project is [flamegraph](h
 
 The profiling section has all the flamegraphs I have accumulated while testing so if you would like to see how I have made progress in my solution, please take a look at the flamegraphs.
 
+## Config
+To switch between single and multithreaded, toggle the boolean in config.toml from false to true
+
 ## Conclusions
 I'm going to stop here for now. I tried to make a multithreaded solution but the compiler has been fighting me about lifetimes for the file which I couldnt find a way around (would appreciate if anyone comes up with a solution, please feel free to open a PR). 
 
 For now, this is my "completed" solution until I figure out a way to make it run faster and how to use the threads in rust directly without lifeline issues. I wasnt able to create the whole measurements.txt file as the JVM OOM when trying to create the file so on my machine for a 10000000 file these are my results:
-- Single threaded: 7000 ms (7 seconds)
-- Multithreaded (using rayon): 14000 ms (14s)
+- Single threaded: 8500 ms (8 seconds)
+- Multithreaded (using rayon): 1400 ms (1.4 seconds)
 
-Interestingly, I was able to hit 840ms (0.84 seconds) using flamegraph to profile my application so the results above are without accounting for any magic flamegraph might be doing behind the scenes to get my application to run faster. 
+Results when profiling:
+- Single threaded: 800 ms (0.8 seconds)
+- Multithreaded (using rayon): 180 ms (0.18 seconds)
+
+Not entirely sure why profiling with flamegraph saved a considerable amount of seconds on execution time but think it might be performing some magic behind the scenes to get the application to run faster.
