@@ -2,10 +2,14 @@ use crate::station::Station;
 use hashbrown::HashMap;
 
 pub fn output_result(map: &mut HashMap<String, Station>) {
-    let mut sorted: Vec<_> = map.iter().collect();
-    sorted.sort_unstable_by_key(|a| a.0);
+    // Get keys and sort them
+    let mut keys: Vec<&String> = map.keys().collect();
+    keys.sort_unstable();
 
-    for (key, value) in sorted.iter() {
-        println!("{0}={1}/{2}/{3}", key, value.min, value.max, value.sum / value.count as f64);
+    // Iterate over sorted keys and print corresponding values
+    for key in keys {
+        if let Some(value) = map.get(key) {
+            println!("{}={}", key, value);
+        }
     }
-} 
+}
