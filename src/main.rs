@@ -1,36 +1,26 @@
 mod station;
 mod file_processor;
+mod float_parser;
+mod line_parser;
+mod result_outputter;
 
 use std::fs::File;
 use std::io::{self};
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use std::time::Instant;
 use station::Station;
 use file_processor::read_file_in_chunks;
-
-fn process_line(map: &mut HashMap<Box<str>, Station>, buffer: &[u8]) {
-    let line = String::from_utf8_lossy(&buffer);
-    let unpacked_line = &line.trim();
-    let (key, val) = unpacked_line.split_once(';').expect("failed to split string");
-    let converted = val.parse::<f64>().expect("failed to parse float");
-    map.entry(key.into()).or_default().update(converted);
-}
-
-fn output_result(map: &mut HashMap<Box<str>, Station>) {
-    let mut sorted: Vec<_> = map.iter().collect();
-    sorted.sort_unstable_by_key(|a| a.0);
-
-    for (key, value) in sorted.iter() {
-        println!("{0}={1}/{2}/{3}", key, value.min, value.max, value.sum / value.count as f64);
-    }
-}
+use result_outputter::output_result;
 
 fn main() -> io::Result<()> {
     let filename = "measurements.txt";
     let file = File::open(filename)?;
     let now = Instant::now();
+    let mut entries: HashMap<String, Station> = HashMap::new();
 
-    read_file_in_chunks(&file)?;
+    read_file_in_chunks(&file, &mut entries)?;
+
+    output_result(&mut entries);
 
     let elapsed_time = now.elapsed();
     println!("Running the program took {} milliseconds", elapsed_time.as_millis());
