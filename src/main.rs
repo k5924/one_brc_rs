@@ -16,15 +16,16 @@ use hashbrown::HashMap;
 use result_outputter::output_result;
 use config_loader::{load_config, get_enable_multithreading};
 
+const FILENAME: &str = "measurements.txt";
+
 fn main() -> io::Result<()> {
-    let filename = "measurements.txt";
-    let file = File::open(filename)?;
-    let mut map = HashMap::new();
+    let config = load_config().expect("unable to load config");
+    let enable_multithreading = get_enable_multithreading(&config).expect("unable to find env variable");
+
     let now = Instant::now();
 
-    let config = load_config().expect("unable to load config");
-
-    let enable_multithreading = get_enable_multithreading(&config).expect("unable to find env variable");
+    let file = File::open(FILENAME)?;
+    let mut map = HashMap::new();
 
     if enable_multithreading {
         process_file_multiple_threads(&file, &mut map)?;
