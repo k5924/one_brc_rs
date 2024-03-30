@@ -48,9 +48,14 @@ impl Station {
 
 impl fmt::Display for Station {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let min_str = format!("{:.1}", self.min);
-        let max_str = format!("{:.1}", self.max);
-        let avg_str = if self.count == 0 { "0.0".to_string() } else { format!("{:.1}", self.sum / self.count as f64) };
-        write!(f, "{}/{}/{}", min_str, max_str, avg_str)
+        write!(f, 
+        "{:.1}/{:.1}/{:.1}", 
+        self.min, 
+        self.max, 
+        if self.count == 0 {
+        0.0
+        } else {
+        self.sum / self.count as f64
+        })
     }
 }
