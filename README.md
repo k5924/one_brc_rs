@@ -11,6 +11,11 @@ The profiling tool of choice i'm using throughout this project is [flamegraph](h
 The profiling section has all the flamegraphs I have accumulated while testing so if you would like to see how I have made progress in my solution, please take a look at the flamegraphs.
 
 ## Config
+Place a config.toml in the root of this directory and use the following config params:
+```toml
+[myapp]
+enable_multithreading = false
+```
 To switch between single and multithreaded, toggle the boolean in config.toml from false to true
 
 ## Conclusions
