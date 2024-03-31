@@ -44,7 +44,8 @@ fn find_chunk_ranges(slice: &[u8], min_chunks: usize) -> io::Result<Vec<Range<us
     Ok(chunks)
 }
 
-fn mmap_file(file: &std::fs::File, min_chunks: usize) -> io::Result<(&[u8], Vec<Range<usize>>)> {
+pub fn process_file_single_thread(file: &File, map: &mut HashMap<String, Station>) -> io::Result<()> {
+    let page_size = unsafe { get_page_size()? };
     let metadata = file.metadata()?;
     let file_size = metadata.len() as usize;
 
@@ -64,17 +65,15 @@ fn mmap_file(file: &std::fs::File, min_chunks: usize) -> io::Result<(&[u8], Vec<
     }
 
     let mmap_slice = unsafe { slice::from_raw_parts(mmap_ptr as *const u8, file_size) };
-    let chunks = find_chunk_ranges(mmap_slice, min_chunks)?;
-    Ok((mmap_slice, chunks))
-}
+    let chunks = find_chunk_ranges(mmap_slice, page_size)?;
 
-pub fn process_file_single_thread(file: &File, map: &mut HashMap<String, Station>) -> io::Result<()> {
-    let page_size = unsafe { get_page_size()? };
-
-    let (mmap, chunks) = mmap_file(&file, page_size)?;
-    
     for chunk in chunks {
-        process_chunk(&mmap[chunk], map)?;
+        process_chunk(&mmap_slice[chunk], map)?;
+    }
+
+    // Unmap the memory
+    unsafe {
+        libc::munmap(mmap_ptr, file_size);
     }
     
     Ok(())
@@ -104,8 +103,6 @@ pub fn process_file_multiple_threads(file: &File, map: &mut HashMap<String, Stat
     let chunks = find_chunk_ranges(mmap_slice, num_threads)?;
 
     let mut handles = vec![];
-    let mut local_maps = vec![];
-
     for chunk in chunks {
         let handle = thread::spawn(move || {
             let mut local_map = HashMap::new();
@@ -115,6 +112,7 @@ pub fn process_file_multiple_threads(file: &File, map: &mut HashMap<String, Stat
         handles.push(handle);
     }
 
+    let mut local_maps = vec![];
     for handle in handles {
         local_maps.push(handle.join().unwrap());
     }
@@ -124,13 +122,37 @@ pub fn process_file_multiple_threads(file: &File, map: &mut HashMap<String, Stat
             merge_or_create(map, &key, value);
         }
     }
+
+    // Unmap the memory
+    unsafe {
+        libc::munmap(mmap_ptr, file_size);
+    }
     
     Ok(())
 }
 
 pub fn process_file_rayon(file: &File, map: &mut HashMap<String, Station>) -> io::Result<()> {
     let num_threads = unsafe {sysconf(_SC_NPROCESSORS_CONF)} as usize;
-    let (mmap, chunks) = mmap_file(&file, num_threads)?;
+    let metadata = file.metadata()?;
+    let file_size = metadata.len() as usize;
+
+    let mmap_ptr = unsafe {
+        libc::mmap(
+            ptr::null_mut(),
+            file_size,
+            libc::PROT_READ,
+            libc::MAP_PRIVATE | libc::MAP_POPULATE,
+            file.as_raw_fd(),
+            0,
+        )
+    };
+
+    if mmap_ptr == libc::MAP_FAILED {
+        return Err(io::Error::last_os_error());
+    }
+
+    let mmap_slice = unsafe { slice::from_raw_parts(mmap_ptr as *const u8, file_size) };
+    let chunks = find_chunk_ranges(mmap_slice, num_threads)?;
 
     let results: Vec<_> = chunks
         .into_par_iter()
@@ -138,7 +160,7 @@ pub fn process_file_rayon(file: &File, map: &mut HashMap<String, Station>) -> io
             let start = chunk.start;
             let end = chunk.end;
             let mut local_map = HashMap::new();
-            process_chunk(&mmap[start..end], &mut local_map)?;
+            process_chunk(&mmap_slice[start..end], &mut local_map)?;
             Ok(local_map)
         })
         .collect::<io::Result<Vec<_>>>()?;
@@ -147,6 +169,11 @@ pub fn process_file_rayon(file: &File, map: &mut HashMap<String, Station>) -> io
         for (key, value) in local_map {
             merge_or_create(map, &key, value);
         }
+    }
+
+    // Unmap the memory
+    unsafe {
+        libc::munmap(mmap_ptr, file_size);
     }
 
     Ok(())

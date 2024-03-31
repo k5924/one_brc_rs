@@ -7,6 +7,7 @@ mod result_outputter;
 mod chunk_processor;
 mod config_loader;
 mod map_processor;
+mod running_mode;
 
 use std::fs::File;
 use std::io::{self};
@@ -15,7 +16,8 @@ use station::Station;
 use file_processor::{process_file_single_thread, process_file_multiple_threads, process_file_rayon};
 use hashbrown::HashMap;
 use result_outputter::output_result;
-use config_loader::{load_config, get_mode, RunningMode};
+use config_loader::{load_config, get_mode};
+use crate::running_mode::RunningMode;
 
 const FILENAME: &str = "measurements.txt";
 
@@ -37,7 +39,7 @@ fn main() -> io::Result<()> {
     output_result(&mut map);
 
     let elapsed_time = now.elapsed();
-    println!("Running the program took {} milliseconds", elapsed_time.as_millis());
+    println!("Running the program took {} milliseconds in {} mode", elapsed_time.as_millis(), mode);
 
     Ok(())
 }

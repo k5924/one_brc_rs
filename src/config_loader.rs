@@ -1,12 +1,6 @@
 use std::io;
 use config::{Config, File as ConfigFile};
-
-#[derive(Debug)]
-pub enum RunningMode {
-    SingleThreaded,
-    MultiThreaded,
-    Rayon,
-}
+use crate::running_mode::RunningMode;
 
 pub fn load_config() -> io::Result<Config> {
     let mut config_builder = Config::builder();
