@@ -20,9 +20,9 @@ mode = "single_thread/multi_thread/rayon"
 To switch between modes, keep the mode you want to run in config.toml
 
 ## Conclusions
-I'm going to stop here for now. I tried to make a multithreaded solution but the compiler has been fighting me about lifelines for the file which I couldnt find a way around (would appreciate if anyone comes up with a solution, please feel free to open a PR). The benchmarks taken dont include loading config params as thats something I added to make switching between solutions easier. The overhead they add to the app I havent included in the benchmarks and only start the timer before any of the processing code beings. To make this more fair, I open the file and build the hashmap after starting the timer so the only variable not accounted for in my benchmarks is the time taken to load config.
+I'm going to stop here for now. The benchmarks taken dont include loading config params as thats something I added to make switching between solutions easier. The overhead they add to the app I havent included in the benchmarks and only start the timer before any of the processing code beings. To make this more fair, I open the file and build the hashmap after starting the timer so the only variable not accounted for in my benchmarks is the time taken to load config.
 
-For now, this is my "completed" solution until I figure out a way to make it run faster and how to use the threads in rust directly without lifeline issues. I wasnt able to create the whole measurements.txt file as the JVM OOM when trying to create the file so on my machine for a 10000000 file these are my results:
+For now, this is my "completed" solution until I figure out a way to make it run faster (maybe spawning the threads asynchronously and reimplementing the key hashing and float parsing. Could then make the local_maps vector a channel/queue that I know has been populated once the threads have finished executing). I wasnt able to create the whole measurements.txt file as the JVM OOM when trying to create the file so on my machine for a 10000000 file these are my results:
 - Single threaded: 6600 ms (6 seconds)
 - Multithreaded: 1400 ms (1.4 seconds)
 - Multithreaded (using rayon): 1400 ms (1.4 seconds)
