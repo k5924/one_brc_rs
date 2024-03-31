@@ -1,2 +1,2 @@
 [myapp]
-enable_multithreading = false
+mode = "single_thread"

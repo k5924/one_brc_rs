@@ -15,19 +15,21 @@ The profiling directory has all the flamegraphs I have accumulated while testing
 Place a config.toml in the root of this directory and use the following config params:
 ```toml
 [myapp]
-enable_multithreading = false
+mode = "single_thread/multi_thread/rayon"
 ```
-To switch between single and multithreaded, toggle the boolean in config.toml from false to true
+To switch between modes, keep the mode you want to run in config.toml
 
 ## Conclusions
 I'm going to stop here for now. I tried to make a multithreaded solution but the compiler has been fighting me about lifelines for the file which I couldnt find a way around (would appreciate if anyone comes up with a solution, please feel free to open a PR). The benchmarks taken dont include loading config params as thats something I added to make switching between solutions easier. The overhead they add to the app I havent included in the benchmarks and only start the timer before any of the processing code beings. To make this more fair, I open the file and build the hashmap after starting the timer so the only variable not accounted for in my benchmarks is the time taken to load config.
 
 For now, this is my "completed" solution until I figure out a way to make it run faster and how to use the threads in rust directly without lifeline issues. I wasnt able to create the whole measurements.txt file as the JVM OOM when trying to create the file so on my machine for a 10000000 file these are my results:
 - Single threaded: 6600 ms (6 seconds)
+- Multithreaded: 1400 ms (1.4 seconds)
 - Multithreaded (using rayon): 1400 ms (1.4 seconds)
 
 Results when profiling:
 - Single threaded: 810 ms (0.81 seconds)
+- Multithreaded: 180 ms (0.18 seconds)
 - Multithreaded (using rayon): 180 ms (0.18 seconds)
 
 Not entirely sure why profiling with flamegraph saved a considerable amount of seconds on execution time but think it might be performing some magic behind the scenes to get the application to run faster.

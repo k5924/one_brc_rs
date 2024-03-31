@@ -1,5 +1,6 @@
 use crate::float_parser::parse_float;
 use crate::Station;
+use crate::map_processor::update_or_create;
 use hashbrown::HashMap;
 
 pub fn process_line(line: &[u8], map: &mut HashMap<String, Station>) {
@@ -17,17 +18,5 @@ pub fn process_line(line: &[u8], map: &mut HashMap<String, Station>) {
     let semicolon_index = unsafe { ptr.offset_from(line.as_ptr()) as usize };
     let part2_float = unsafe { parse_float(&line[semicolon_index + 1..]) };
     let key = unsafe { std::str::from_utf8_unchecked(&line[..semicolon_index]) };
-    let entry = map.raw_entry_mut().from_key(key);
-
-    // Handle the entry
-    match entry {
-        // If entry exists, update it
-        hashbrown::hash_map::RawEntryMut::Occupied(mut occupied) => {
-            occupied.get_mut().update(part2_float);
-        }
-        // If entry doesn't exist, insert a new one
-        hashbrown::hash_map::RawEntryMut::Vacant(vacant) => {
-            vacant.insert(key.to_string(), Station::new(part2_float));
-        }
-    }
+    update_or_create(map, key, part2_float);
 }
