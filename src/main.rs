@@ -18,10 +18,14 @@ use hashbrown::HashMap;
 use result_outputter::output_result;
 use config_loader::{load_config, get_mode};
 use crate::running_mode::RunningMode;
+use log4rs;
+use log::info;
 
 const FILENAME: &str = "measurements.txt";
 
 fn main() -> io::Result<()> {
+    log4rs::init_file("config/log/log4rs.yaml", Default::default()).expect("unable to load log config");
+
     let config = load_config().expect("unable to load config");
     let mode = get_mode(&config).expect("unable to find env variable");
 
@@ -39,7 +43,7 @@ fn main() -> io::Result<()> {
     output_result(&mut map);
 
     let elapsed_time = now.elapsed();
-    println!("Running the program took {} milliseconds in {} mode", elapsed_time.as_millis(), mode);
+    info!("Running the program took {} milliseconds in {} mode", elapsed_time.as_millis(), mode);
 
     Ok(())
 }
