@@ -18,12 +18,12 @@ use log::info;
 
 use std::fs::File;
 use std::io::{self};
-
-#[cfg(not(feature = "rayon"))]
-use std::io::{ErrorKind, Error};
 use std::time::Instant;
 use station::Station;
 use file_processor::{process_file_single_thread, process_file_multiple_threads};
+
+#[cfg(not(feature = "rayon"))]
+use std::io::{ErrorKind, Error};
 
 #[cfg(feature = "rayon")]
 use file_processor::process_file_rayon;

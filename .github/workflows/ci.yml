@@ -7,6 +7,8 @@ on:
 
 env: 
   CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: -D warnings
 
 jobs:
   build_and_test:
@@ -15,11 +17,24 @@ jobs:
     steps:
       - name: Set up Rust
         uses: actions/checkout@v3
+      - name: Install sccache
+        run: cargo install sccache
+      - name: Configure sccache
+        run: sccache --set-dir=$HOME/.cache/sccache
+      - name: Cache sccache
+        uses: actions/cache@v2
+        with:
+          path: $HOME/.cache/sccache
+          key: ${{ runner.os }}-sccache-${{ hashFiles('Cargo.lock') }}
       - name: Install cargo-audit
         run: cargo install cargo-audit
+      - name: Install nextest
+        run: cargo install nextest --locked
       - name: Build
         run: cargo build --verbose
+      - name: Compile
+        run: cargo nextest run --no-run --locked
       - name: Test
-        run: cargo test --verbose
+        run: cargo nextest run --verbose
       - name: Audit
         run: cargo audit
