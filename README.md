@@ -18,6 +18,10 @@ Place a config.toml in the root of this directory and use the following config p
 mode = "single_thread/multi_thread/rayon"
 ```
 To switch between modes, keep the mode you want to run in config.toml
+To run the rayon mode, make sure to use this run command instead of running cargo run
+```sh
+cargo run --features rayon
+```
 
 ## Conclusions
 I'm going to stop here for now. The benchmarks taken dont include loading config params as thats something I added to make switching between solutions easier. The overhead they add to the app I havent included in the benchmarks and only start the timer before any of the processing code beings. To make this more fair, I open the file and build the hashmap after starting the timer so the only variable not accounted for in my benchmarks is the time taken to load config.

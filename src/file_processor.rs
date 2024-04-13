@@ -10,6 +10,8 @@ use crate::utils::is_newline_char;
 use crate::map_processor::merge_or_create;
 use crate::Station;
 use hashbrown::HashMap;
+
+#[cfg(feature = "rayon")]
 use rayon::prelude::*;
 
 unsafe fn get_page_size() -> io::Result<usize> {
@@ -131,6 +133,7 @@ pub fn process_file_multiple_threads(file: &File, map: &mut HashMap<String, Stat
     Ok(())
 }
 
+#[cfg(feature="rayon")]
 pub fn process_file_rayon(file: &File, map: &mut HashMap<String, Station>) -> io::Result<()> {
     let num_threads = unsafe {sysconf(_SC_NPROCESSORS_CONF)} as usize;
     let metadata = file.metadata()?;
