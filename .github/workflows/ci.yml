@@ -20,7 +20,7 @@ jobs:
       - name: Install cargo-audit
         run: cargo install cargo-audit
       - name: Install nextest
-        run: cargo install nextest --locked
+        uses: taiki-e/install-action@nextest
       - name: Build
         run: cargo build --verbose
       - name: Compile
